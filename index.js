@@ -964,11 +964,12 @@ app.get('/load/users',async (req, res) =>{
         res.status(500).json({error:'Internal Server Error!!'})
     }
 })
+
 app.get('/load/request',async (req, res) =>{
+    const client = new MongoClient(uri)
     try{
-        const client = new MongoClient(uri)
         await client.connect()
-        const dataRequest = client.db('lastREMS').collection('request')
+        const dataRequest = await client.db('lastREMS').collection('request').find({}).toArray()
         res.json(dataRequest)
     } catch(err){
         console.error(err)
