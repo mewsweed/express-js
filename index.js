@@ -969,7 +969,7 @@ app.post('/auth/load/user',async (req, res) => {
     const token = req.body.jwt
     const client = new MongoClient(uri)
     const decoded = jwt.verify(token, secret)
-    console.log(decoded)
+    console.log(decoded.userId)
     try{
         await client.connect()
         
