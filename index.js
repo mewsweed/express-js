@@ -831,7 +831,7 @@ app.post('/auth/login', async (req, res, next) => {
         }
         const userInfo = await client.db("lastREMS").collection("users-info").findOne({ userId: existingEmail._id});
 
-        const token = jwt.sign({ role: existingEmail.role, userId: existingEmail._id}, secret, {expiresIn: '1h'});
+        const token = jwt.sign({ role: existingEmail.role, userId: existingEmail._id, email: existingEmail.email}, secret, {expiresIn: '1h'});
         var decoded = jwt.verify(token,secret)
         res.status(200).send({
             status: "ok",
@@ -926,7 +926,7 @@ app.post('/auth/regis',async (req, res) => {
 
 app.post('/jwtdecode', async (req, res) => {
     try{
-        const token = req.body.jwt
+        const token = req.body.token
         // console.log(token)
         var decoded = jwt.verify(token, secret)
         res.json({status:'ok',decoded})
@@ -964,7 +964,7 @@ app.get('/load/users',async (req, res) =>{
         res.status(500).json({error:'Internal Server Error!!'})
     }
 })
-
+//LOAD ALL REQUEST
 app.get('/load/request',async (req, res) =>{
     const client = new MongoClient(uri)
     try{
@@ -976,16 +976,64 @@ app.get('/load/request',async (req, res) =>{
         res.status(500).json({error:'Internal Server Error!!'})
     }
 })
+//LOAD ALL REQUEST
 
 app.post('/auth/load/user',async (req, res) => {
     const token = req.body.jwt
     const client = new MongoClient(uri)
     const decoded = jwt.verify(token, secret)
-    const uid = decoded.userId
+    console.log(decoded.userId)
+    // const uid = decoded.userId
     try{
         await client.connect()
+        const user = await client.db('lastREMS').collection('users').findOne({"_id":decoded.userId})
+        res.send(user)
+    }catch{ 
+
+    }
+})
+
+app.post('/accept/request', async (req, res) =>{
+    const data = req.body
+    const client = new MongoClient(uri)
+    
+})
+
+app.get('/request/:id', async (req, res) => {
+    try {
+        const id = req.params.id; // รับค่า id จาก URL parameter
+        const client = new MongoClient(uri);
+        await client.connect();
         
-    }catch{
+        const dataRequest = await client.db('lastREMS').collection('request').findOne({ "_id": id });
+        // ค้นหาข้อมูลใน collection 'request' ด้วย id ที่รับมา โดยใช้ findOne()
+
+        if (!dataRequest) {
+            return res.status(404).json({ error: 'Data not found' }); // ถ้าไม่พบข้อมูลให้ส่งค่า 404
+        }
+
+        res.json(dataRequest); // ส่งข้อมูลที่พบกลับไปให้ผู้ใช้
+    } catch(err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error!!' });
+    }
+});
+
+app.post('/event/request', upload, async (req, res) =>{
+    const eventData = req.body.event
+    const eventLocationData = req.body.eventLocation
+    const eventRewardData = req.body.eventRewards
+    const ownerData = req.body.owner
+    if(req.file){
+        event.file = req.file.filename
+    }
+    const client = new MongoClient(uri)
+    try{
+        await client.connect()
+        await client.db('lastREMS').collection('request').insertOne({
+
+        })
+    }catch(error){
 
     }
 })
