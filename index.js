@@ -964,12 +964,23 @@ app.get('/load/users',async (req, res) =>{
         res.status(500).json({error:'Internal Server Error!!'})
     }
 })
+app.get('/load/request',async (req, res) =>{
+    try{
+        const client = new MongoClient(uri)
+        await client.connect()
+        const dataRequest = client.db('lastREMS').collection('request')
+        res.json(dataRequest)
+    } catch(err){
+        console.error(err)
+        res.status(500).json({error:'Internal Server Error!!'})
+    }
+})
 
 app.post('/auth/load/user',async (req, res) => {
     const token = req.body.jwt
     const client = new MongoClient(uri)
     const decoded = jwt.verify(token, secret)
-    console.log(decoded.userId)
+    const uid = decoded.userId
     try{
         await client.connect()
         
